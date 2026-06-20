@@ -91,6 +91,17 @@ class DanmakuSplitTUI(App):
     def on_limit_submitted(self) -> None:
         self.query_one("#pnum", Input).focus()
 
+    # ── 分割模式切换 ──
+
+    @on(RadioSet.Changed, "#split-mode")
+    def on_split_mode_changed(self, event: RadioSet.Changed) -> None:
+        """切换分割模式时更新 placeholder"""
+        limit_input = self.query_one("#limit", Input)
+        if event.radio_button.id == "by-users":
+            limit_input.placeholder = "留空=自动计算"
+        else:
+            limit_input.placeholder = "必填"
+
     # ── 快捷键 ──
 
     def action_preview(self) -> None:
