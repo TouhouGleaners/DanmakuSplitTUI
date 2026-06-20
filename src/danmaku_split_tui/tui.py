@@ -1,6 +1,8 @@
 """TUI 界面"""
 
 import time
+import xml.etree.ElementTree as ET
+from pathlib import Path
 
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal
@@ -20,7 +22,7 @@ class DanmakuSplitTUI(App):
 
     TITLE = "DanmakuSplitTUI"
     SUB_TITLE = "弹幕 XML 领区切割工具"
-    CSS_PATH = "styles.tcss"
+    CSS_PATH = Path(__file__).parent / "styles.tcss"
 
     BINDINGS = [
         Binding("q", "quit", "退出"),
@@ -136,9 +138,14 @@ class DanmakuSplitTUI(App):
         p_num = self.query_one("#pnum", Input).value.strip() or "1"
 
         by_users = self.query_one("#by-users", RadioButton).value
-        if by_users and not users:
-            self.status_text = "❌ 按人头平分模式需要输入负责人列表"
-            return None
+        if by_users:
+            if not users:
+                self.status_text = "❌ 按人头平分模式需要输入负责人列表"
+                return None
+        else:
+            if not limit:
+                self.status_text = "❌ 按数量限制模式需要填写单片上限"
+                return None
 
         return DanmakuSplitter(input_path, users, limit, p_num)
 
@@ -154,26 +161,14 @@ class DanmakuSplitTUI(App):
             count = splitter.load()
             chunks = splitter.plan()
 
-            table = self.query_one("#preview-table", DataTable)
-            table.clear()
-            for chunk in chunks:
-                t0 = fmt_time(chunk['data'][0].get('p').split(',')[0])
-                t1 = fmt_time(chunk['data'][-1].get('p').split(',')[0])
-                anchor = (chunk['data'][0].text or "").replace('\n', ' ')[:30]
-                table.add_row(
-                    str(chunk['index']),
-                    chunk['assignee'],
-                    f"{len(chunk['data']):,}",
-                    f"{t0} → {t1}",
-                    anchor
-                )
+            self._fill_preview_table(chunks)
 
             self.status_text = f"✓ 预览完成 | 弹幕 {count:,} 条 | 分片 {len(chunks)} 个"
 
         except FileNotFoundError as e:
             self.status_text = f"❌ {e}"
-        except Exception as e:
-            self.status_text = f"❌ 解析失败: {e}"
+        except (ET.ParseError, ValueError) as e:
+            self.status_text = f"❌ XML 解析失败: {e}"
 
     # ── 切割 ──
 
@@ -208,7 +203,7 @@ class DanmakuSplitTUI(App):
 
         except FileNotFoundError as e:
             self.app.call_from_thread(self._update_status, f"❌ {e}")
-        except Exception as e:
+        except (ET.ParseError, ValueError, OSError) as e:
             self.app.call_from_thread(self._update_status, f"❌ 切割失败: {e}")
         finally:
             self.is_processing = False
@@ -219,6 +214,10 @@ class DanmakuSplitTUI(App):
         self.status_text = text
 
     def _update_preview(self, chunks: list[dict]) -> None:
+        self._fill_preview_table(chunks)
+
+    def _fill_preview_table(self, chunks: list[dict]) -> None:
+        """填充预览表格"""
         table = self.query_one("#preview-table", DataTable)
         table.clear()
         for chunk in chunks:

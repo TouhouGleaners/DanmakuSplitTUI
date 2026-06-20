@@ -103,5 +103,5 @@ def fmt_time(s: str) -> str:
     try:
         m, sec = divmod(int(float(s)), 60)
         return f"{m:02d}:{sec:02d}"
-    except Exception:
+    except (ValueError, TypeError):
         return "--:--"
