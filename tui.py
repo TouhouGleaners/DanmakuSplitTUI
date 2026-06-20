@@ -18,7 +18,7 @@ from splitter import DanmakuSplitter, fmt_time
 class DanmakuSplitTUI(App):
     """弹幕切割 TUI 应用"""
 
-    TITLE = "DanmakuSplitCLI"
+    TITLE = "DanmakuSplitTUI"
     SUB_TITLE = "弹幕 XML 领区切割工具"
     CSS_PATH = "styles.tcss"
 
