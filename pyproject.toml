@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "danmaku-split-tui"
+version = "1.0.0"
+description = "基于时间轴排序的 B 站弹幕 XML 分割工具 (TUI 版)"
+readme = "README.md"
+authors = [
+    { name = "Miku_oso", email = "mikuoso@qq.com" }
+]
+license = {text = "MIT"}
+requires-python = ">=3.12"
+dependencies = [
+    "textual>=8.2.7",
+]
+
+[project.scripts]
+danmaku-split-tui = "danmaku_split_tui.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
