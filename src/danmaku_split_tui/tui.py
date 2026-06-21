@@ -206,7 +206,8 @@ class DanmakuSplitTUI(App):
             t_start = time.time()
             for i, _ in enumerate(splitter.write_all()):
                 self.app.call_from_thread(self._update_progress, i + 1, len(chunks))
-                time.sleep(0.05)
+                if len(chunks) <= 100:  # 分块少时保留动画，分块多时跳过
+                    time.sleep(0.05)
 
             elapsed = time.time() - t_start
             self.app.call_from_thread(self._hide_progress)
