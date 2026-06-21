@@ -95,12 +95,15 @@ class DanmakuSplitTUI(App):
 
     @on(RadioSet.Changed, "#split-mode")
     def on_split_mode_changed(self, event: RadioSet.Changed) -> None:
-        """切换分割模式时更新 placeholder"""
+        """切换分割模式时更新 placeholder 并清空另一模式的输入"""
         limit_input = self.query_one("#limit", Input)
+        users_input = self.query_one("#users", Input)
         if event.radio_button.id == "by-users":
             limit_input.placeholder = "留空=自动计算"
+            limit_input.value = ""
         else:
             limit_input.placeholder = "必填"
+            users_input.value = ""
 
     # ── 快捷键 ──
 
@@ -189,7 +192,7 @@ class DanmakuSplitTUI(App):
         if not splitter:
             return
 
-        self.is_processing = True
+        self.app.call_from_thread(self._set_processing, True)
         try:
             self.app.call_from_thread(self._update_status, "⏳ 解析 XML 中...")
             count = splitter.load()
@@ -217,9 +220,12 @@ class DanmakuSplitTUI(App):
         except (ET.ParseError, ValueError, OSError) as e:
             self.app.call_from_thread(self._update_status, f"❌ 切割失败: {e}")
         finally:
-            self.is_processing = False
+            self.app.call_from_thread(self._set_processing, False)
 
     # ── 线程安全的 UI 更新 ──
+
+    def _set_processing(self, value: bool) -> None:
+        self.is_processing = value
 
     def _update_status(self, text: str) -> None:
         self.status_text = text

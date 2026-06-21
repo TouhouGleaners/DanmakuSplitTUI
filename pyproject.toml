@@ -21,3 +21,6 @@ danmaku-split-tui = "danmaku_split_tui.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+danmaku_split_tui = ["*.tcss"]
