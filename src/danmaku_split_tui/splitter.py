@@ -25,7 +25,7 @@ class DanmakuSplitter:
         if not self.input_file.exists():
             raise FileNotFoundError(f"找不到输入文件: {self.input_file}")
 
-        tree = ET.parse(str(self.input_file))  # 不使用 defusedxml：个人工具，XML 来源为用户自行审查的 B 站弹幕
+        tree = ET.parse(str(self.input_file))  # sourcery skip: 不使用 defusedxml，个人工具，XML 来源为用户自行审查的 B 站弹幕
         root = tree.getroot()
         self.header_nodes = [c for c in root if c.tag != 'd']
 
