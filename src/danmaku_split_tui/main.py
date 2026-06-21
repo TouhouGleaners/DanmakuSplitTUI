@@ -1,6 +1,11 @@
 """DanmakuSplitTUI — 弹幕 XML 分领区切割器"""
 
-from danmaku_split_tui.main import main
+from .tui import DanmakuSplitTUI
+
+
+def main():
+    app = DanmakuSplitTUI()
+    app.run()
 
 
 if __name__ == "__main__":
